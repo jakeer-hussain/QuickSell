@@ -51,8 +51,19 @@ const answerInquiry = async (inquiryId, sellerId, answerText) => {
     return inquiry;
 };
 
+const getInquiriesBySeller = async (sellerId) => {
+    const listings = await Listing.find({ seller: sellerId }, "_id");
+    const listingIds = listings.map((listing) => listing._id);
+
+    return Inquiry.find({ listing: { $in: listingIds } })
+        .populate("listing", "title price images status")
+        .populate("buyer", "name email")
+        .sort({ createdAt: -1 });
+};
+
 module.exports = {
     createInquiry,
     getInquiriesByListing,
-    answerInquiry
+    answerInquiry,
+    getInquiriesBySeller
 };

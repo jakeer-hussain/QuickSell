@@ -11,19 +11,22 @@ const createListing = async (listingData,sellerId) => {
 };
 
 const getAllListings = async (
-    filters
+    filters = {}
 ) => {
 
     const {
         search,
         category,
         minPrice,
-        maxPrice
+        maxPrice,
+        status
     } = filters;
 
-    const query = {
-        status: "ACTIVE"
-    };
+    const query = {};
+
+    if (status) {
+        query.status = status;
+    }
 
     if (search) {
 

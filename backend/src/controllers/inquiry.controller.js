@@ -52,8 +52,20 @@ const answerInquiry = async (req, res) => {
     }
 };
 
+const getSellerInquiries = async (req, res) => {
+    try {
+        const inquiries = await inquiryService.getInquiriesBySeller(req.user.id);
+        res.json(inquiries);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
     createInquiry,
     getListingInquiries,
-    answerInquiry
+    answerInquiry,
+    getSellerInquiries
 };

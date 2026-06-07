@@ -15,6 +15,11 @@ const inquiryService = {
     const response = await api.patch(`/inquiries/${inquiryId}/answer`, { answer });
     return response.data;
   },
+
+  getSellerInquiries: async () => {
+    const response = await api.get("/inquiries/seller");
+    return response.data;
+  },
 };
 
 export default inquiryService;

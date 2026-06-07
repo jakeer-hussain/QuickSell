@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Plus, Check, Tag, Trash2 } from "lucide-react";
+import { Plus, Check, Tag, Trash2, MessageCircle, HelpCircle } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import listingService from "../services/listingService";
+import inquiryService from "../services/inquiryService";
 
 const CATEGORIES = [
   "Electronics",
@@ -21,6 +22,11 @@ function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () =>
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Inquiries State
+  const [inquiries, setInquiries] = useState([]);
+  const [answerTexts, setAnswerTexts] = useState({});
+  const [inquiryTab, setInquiryTab] = useState("pending"); // 'pending' | 'answered' | 'all'
+
   // New Listing Form States
   const [newTitle, setNewTitle] = useState("");
   const [newPrice, setNewPrice] = useState("");
@@ -30,6 +36,7 @@ function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () =>
 
   useEffect(() => {
     fetchMyListings();
+    fetchMyInquiries();
   }, []);
 
   const fetchMyListings = async () => {
@@ -43,6 +50,32 @@ function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () =>
       setError("Failed to load your listings.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMyInquiries = async () => {
+    try {
+      const data = await inquiryService.getSellerInquiries();
+      setInquiries(data);
+    } catch (err) {
+      console.error("Failed to load seller inquiries:", err);
+    }
+  };
+
+  const handleAnswerInquiry = async (inquiryId) => {
+    const text = answerTexts[inquiryId];
+    if (!text || !text.trim()) return;
+    try {
+      setActionLoading(true);
+      await inquiryService.answerInquiry(inquiryId, text);
+      setAnswerTexts((prev) => ({ ...prev, [inquiryId]: "" }));
+      triggerToast("Answer submitted to potential buyer! ✉️");
+      await fetchMyInquiries();
+    } catch (err) {
+      console.error("Failed to submit answer:", err);
+      triggerToast(err.response?.data?.message || "Failed to submit answer. ⚠️");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -381,6 +414,174 @@ function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () =>
 
         </div>
 
+      </div>
+
+      {/* Inquiries / Q&A Dashboard */}
+      <div className="clay-card p-6 md:p-8 bg-white space-y-6">
+        <div className="border-b border-slate-100 pb-4 flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-indigo-500" /> Received Customer Inquiries
+            </h3>
+            <p className="text-xs text-slate-500 font-medium">
+              View and answer questions from potential buyers about your products.
+            </p>
+          </div>
+
+          {/* Tab filters */}
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-extrabold text-slate-500">
+            {[
+              { id: "pending", label: "Pending Reply" },
+              { id: "answered", label: "Answered" },
+              { id: "all", label: "All Queries" }
+            ].map((tab) => {
+              const count = inquiries.filter(q => {
+                if (tab.id === "pending") return !q.answer;
+                if (tab.id === "answered") return !!q.answer;
+                return true;
+              }).length;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setInquiryTab(tab.id)}
+                  className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                    inquiryTab === tab.id
+                      ? "bg-white text-indigo-600 shadow-sm"
+                      : "hover:text-slate-800"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                    inquiryTab === tab.id ? "bg-indigo-100 text-indigo-700" : "bg-slate-200 text-slate-600"
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Filtered inquiries list */}
+        {(() => {
+          const filteredInquiries = inquiries.filter((q) => {
+            if (inquiryTab === "pending") return !q.answer;
+            if (inquiryTab === "answered") return !!q.answer;
+            return true;
+          });
+
+          if (filteredInquiries.length === 0) {
+            return (
+              <div className="text-center py-12 text-slate-400 space-y-2">
+                <HelpCircle className="w-8 h-8 text-slate-300 mx-auto animate-pulse" />
+                <p className="text-sm font-bold">No inquiries found in this section!</p>
+                <p className="text-xs">
+                  {inquiryTab === "pending" 
+                    ? "Hooray! No pending questions to answer right now."
+                    : "No answered inquiries yet."}
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredInquiries.map((q) => {
+                const buyerName = q.buyer?.name || "Potential Buyer";
+                const productTitle = q.listing?.title || "Deleted Product";
+                const productPrice = q.listing?.price || "N/A";
+                const isSold = q.listing?.status === "SOLD" || q.listing?.status === "Sold";
+                const displayImage = Array.isArray(q.listing?.images) && q.listing.images.length > 0 
+                  ? q.listing.images[0] 
+                  : "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=400";
+                
+                return (
+                  <div key={q._id || q.id} className="p-5 rounded-2xl border border-slate-100 bg-white shadow-sm flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      {/* Product Preview Header */}
+                      <div 
+                        className="flex items-center gap-3 pb-3 border-b border-slate-50 cursor-pointer hover:opacity-90"
+                        onClick={() => {
+                          if (q.listing?._id || q.listing?.id) {
+                            setSelectedProductId(q.listing._id || q.listing.id);
+                            setActivePage("detail");
+                          }
+                        }}
+                      >
+                        <img 
+                          src={displayImage} 
+                          alt={productTitle} 
+                          className="w-10 h-10 rounded-lg object-cover border border-slate-200"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-extrabold text-slate-800 text-xs truncate hover:text-indigo-600 transition-colors">
+                            {productTitle}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-indigo-600">${productPrice}</span>
+                            {isSold && (
+                              <span className="text-[9px] font-black uppercase bg-red-100 text-red-700 px-1 py-0.5 rounded">
+                                Sold Out
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Question Details */}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                          <span className="px-1.5 py-0.5 bg-pink-100 text-pink-700 rounded">Query</span>
+                          <span>From {buyerName}</span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-800 leading-relaxed pl-1">
+                          "{q.message}"
+                        </p>
+                      </div>
+
+                      {/* Answer/Reply Details */}
+                      {q.answer ? (
+                        <div className="pl-3 border-l-2 border-indigo-100 space-y-1">
+                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                            <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded">Your Answer</span>
+                          </div>
+                          <p className="text-xs text-slate-600 italic pl-1">
+                            "{q.answer}"
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="pt-2 pl-3 border-l-2 border-pink-200 space-y-2">
+                          <div className="text-[10px] text-pink-500 font-bold uppercase tracking-wider">
+                            <span>Write Reply</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Write your answer..."
+                              value={answerTexts[q._id || q.id] || ""}
+                              onChange={(e) =>
+                                setAnswerTexts({ ...answerTexts, [q._id || q.id]: e.target.value })
+                              }
+                              disabled={actionLoading}
+                              className="flex-1 px-3 py-1.5 clay-input text-xs font-semibold"
+                            />
+                            <button
+                              onClick={() => handleAnswerInquiry(q._id || q.id)}
+                              disabled={actionLoading || !(answerTexts[q._id || q.id] || "").trim()}
+                              className="px-3.5 py-1.5 clay-btn-green text-[10px] font-bold cursor-pointer shrink-0"
+                            >
+                              Reply
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
 
     </div>

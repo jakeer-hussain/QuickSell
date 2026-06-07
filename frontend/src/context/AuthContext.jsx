@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       // Fetch user profile if not loaded
       authService.getMe()
         .then((res) => {
-          setUser(res);
+          setUser(res ? { ...res, id: res.id || res._id } : null);
           setError("");
         })
         .catch((err) => {

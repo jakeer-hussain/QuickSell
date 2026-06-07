@@ -133,7 +133,7 @@ function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = (
 
   const productId = product._id || product.id;
   const sellerId = product.seller?._id || product.seller?.id || product.seller;
-  const isOwner = user && user.id === sellerId;
+  const isOwner = user && (user.id === sellerId || user._id === sellerId);
   const isSold = product.status === "SOLD" || product.status === "Sold";
   const sellerName = product.seller?.name || "Seller";
 

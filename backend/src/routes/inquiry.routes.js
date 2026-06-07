@@ -17,6 +17,12 @@ router.post(
 );
 
 router.get(
+    "/seller",
+    authMiddleware,
+    inquiryController.getSellerInquiries
+);
+
+router.get(
     "/listing/:listingId",
     inquiryController.getListingInquiries
 );
