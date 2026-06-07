@@ -26,6 +26,34 @@ const createInquiry = async (
     }
 };
 
+const getListingInquiries = async (req, res) => {
+    try {
+        const inquiries = await inquiryService.getInquiriesByListing(req.params.listingId);
+        res.json(inquiries);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
+const answerInquiry = async (req, res) => {
+    try {
+        const inquiry = await inquiryService.answerInquiry(
+            req.params.inquiryId,
+            req.user.id,
+            req.body.answer
+        );
+        res.json(inquiry);
+    } catch (error) {
+        res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
-    createInquiry
+    createInquiry,
+    getListingInquiries,
+    answerInquiry
 };

@@ -1,4 +1,7 @@
 const mongoose = require("mongoose");
+const CATEGORIES = require(
+    "../constants/categories"
+);
 
 const listingSchema = new mongoose.Schema(
     {
@@ -22,8 +25,9 @@ const listingSchema = new mongoose.Schema(
 
         category: {
             type: String,
+            enum: CATEGORIES,
             required: true,
-            trim: true
+            // trim: true
         },
 
         images: {

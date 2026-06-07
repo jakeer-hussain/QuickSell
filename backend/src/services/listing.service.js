@@ -10,16 +10,65 @@ const createListing = async (listingData,sellerId) => {
     return listing;
 };
 
-const getAllListings = async () => {
+const getAllListings = async (
+    filters
+) => {
 
-    const listings = await Listing
-        .find({ status: "ACTIVE" })
+    const {
+        search,
+        category,
+        minPrice,
+        maxPrice
+    } = filters;
+
+    const query = {
+        status: "ACTIVE"
+    };
+
+    if (search) {
+
+        query.$or = [
+            {
+                title: {
+                    $regex: search,
+                    $options: "i"
+                }
+            },
+            {
+                description: {
+                    $regex: search,
+                    $options: "i"
+                }
+            }
+        ];
+
+    }
+
+    if (category) {
+        query.category = category;
+    }
+
+    if (minPrice || maxPrice) {
+
+        query.price = {};
+
+        if (minPrice) {
+            query.price.$gte =
+                Number(minPrice);
+        }
+
+        if (maxPrice) {
+            query.price.$lte =
+                Number(maxPrice);
+        }
+    }
+
+    return Listing.find(query)
         .populate(
             "seller",
             "name email"
         );
 
-    return listings;
 };
 
 const getListingById = async (

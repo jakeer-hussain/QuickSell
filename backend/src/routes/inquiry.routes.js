@@ -16,4 +16,15 @@ router.post(
     inquiryController.createInquiry
 );
 
+router.get(
+    "/listing/:listingId",
+    inquiryController.getListingInquiries
+);
+
+router.patch(
+    "/:inquiryId/answer",
+    authMiddleware,
+    inquiryController.answerInquiry
+);
+
 module.exports = router;

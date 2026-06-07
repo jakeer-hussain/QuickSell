@@ -18,6 +18,11 @@ const inquirySchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true
+        },
+
+        answer: {
+            type: String,
+            default: ""
         }
     },
     {

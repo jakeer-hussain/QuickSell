@@ -17,10 +17,14 @@ const createListing = async (req, res) => {
 
 const getAllListings = async (req, res) => {
     try {
+
         const listings =
-            await listingService.getAllListings();
+            await listingService.getAllListings(
+                req.query
+            );
 
         res.json(listings);
+
     } catch (error) {
         res.status(500).json({
             message: error.message
