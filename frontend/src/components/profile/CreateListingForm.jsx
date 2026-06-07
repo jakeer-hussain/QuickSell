@@ -154,14 +154,6 @@ function CreateListingForm({
               />
             )}
           </div>
-
-          {newImage && (
-            <img
-              src={URL.createObjectURL(newImage)}
-              alt="Preview"
-              className="w-full h-40 object-cover rounded-xl"
-            />
-          )}
         </div>
 
         {/* Description */}
