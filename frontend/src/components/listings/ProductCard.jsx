@@ -1,7 +1,9 @@
 import React from "react";
 import { ChevronRight, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-function ProductCard({ product, setSelectedProductId, setActivePage }) {
+function ProductCard({ product }) {
+  const navigate = useNavigate();
   const isSold = product.status === "SOLD" || product.status === "Sold";
   const displayCategory = product.category || "General";
   const displayTitle = product.title || "No Title";
@@ -15,8 +17,7 @@ function ProductCard({ product, setSelectedProductId, setActivePage }) {
     : (product.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=400");
 
   const handleCardClick = () => {
-    setSelectedProductId(product._id || product.id);
-    setActivePage("detail");
+    navigate(`/listings/${product._id || product.id}`);
   };
 
   return (

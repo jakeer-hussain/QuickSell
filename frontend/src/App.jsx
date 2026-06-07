@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import ListingDetailsPage from "./pages/ListingDetailsPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -8,8 +9,6 @@ import Footer from "./components/layout/Footer";
 import { AuthProvider } from "./context/AuthContext";
 
 function MainAppContent() {
-  const [activePage, setActivePage] = useState("explore"); // 'explore' | 'detail' | 'profile' | 'auth'
-  const [selectedProductId, setSelectedProductId] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
   const [toastTimeoutId, setToastTimeoutId] = useState(null);
 
@@ -27,38 +26,27 @@ function MainAppContent() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-indigo-50/40 via-slate-50 to-pink-50/30 flex flex-col justify-between antialiased">
       <div>
-        <Header activePage={activePage} setActivePage={setActivePage} />
+        <Header />
 
         <main className="max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
-          {activePage === "explore" && (
-            <HomePage
-              setSelectedProductId={setSelectedProductId}
-              setActivePage={setActivePage}
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/listings/:id"
+              element={
+                <ListingDetailsPage triggerToast={triggerToast} />
+              }
             />
-          )}
-
-          {activePage === "detail" && (
-            <ListingDetailsPage
-              selectedProductId={selectedProductId}
-              setActivePage={setActivePage}
-              triggerToast={triggerToast}
+            <Route
+              path="/profile"
+              element={<ProfilePage triggerToast={triggerToast} />}
             />
-          )}
-
-          {activePage === "profile" && (
-            <ProfilePage
-              setSelectedProductId={setSelectedProductId}
-              setActivePage={setActivePage}
-              triggerToast={triggerToast}
+            <Route
+              path="/auth"
+              element={<AuthPage triggerToast={triggerToast} />}
             />
-          )}
-
-          {activePage === "auth" && (
-            <AuthPage
-              setActivePage={setActivePage}
-              triggerToast={triggerToast}
-            />
-          )}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </main>
       </div>
 

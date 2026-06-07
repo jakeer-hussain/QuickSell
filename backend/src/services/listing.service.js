@@ -22,6 +22,10 @@ const getAllListings = async (
         status
     } = filters;
 
+    const page = Number(filters.page) || 1;
+    const limit = Number(filters.limit) || 6;
+    const skip = (page - 1) * limit;
+
     const query = {};
 
     if (status) {
@@ -66,11 +70,22 @@ const getAllListings = async (
         }
     }
 
-    return Listing.find(query)
+    const total = await Listing.countDocuments(query);
+    const listings = await Listing.find(query)
         .populate(
             "seller",
             "name email"
-        );
+        )
+        .skip(skip)
+        .limit(limit);
+
+    return {
+        listings,
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+    };
 
 };
 

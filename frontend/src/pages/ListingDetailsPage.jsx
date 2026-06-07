@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ArrowLeft, MessageCircle, Info, Sparkles } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import listingService from "../services/listingService";
 import inquiryService from "../services/inquiryService";
 
-function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = () => {} }) {
+function ListingDetailsPage({ triggerToast = () => {} }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [product, setProduct] = useState(null);
   const [inquiries, setInquiries] = useState([]);
@@ -14,19 +17,23 @@ function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = (
   const [answerTexts, setAnswerTexts] = useState({}); // inquiryId -> answer string
   const [actionLoading, setActionLoading] = useState(false);
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   useEffect(() => {
-    if (selectedProductId) {
+    if (id) {
       fetchDetails();
     }
-  }, [selectedProductId]);
+  }, [id]);
 
   const fetchDetails = async () => {
     try {
       setLoading(true);
-      const prodData = await listingService.getListingById(selectedProductId);
+      const prodData = await listingService.getListingById(id);
       setProduct(prodData);
       
-      const inquiriesData = await inquiryService.getInquiriesByListing(selectedProductId);
+      const inquiriesData = await inquiryService.getInquiriesByListing(id);
       setInquiries(inquiriesData);
       setError("");
     } catch (err) {
@@ -39,7 +46,7 @@ function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = (
 
   const reloadInquiries = async () => {
     try {
-      const inquiriesData = await inquiryService.getInquiriesByListing(selectedProductId);
+      const inquiriesData = await inquiryService.getInquiriesByListing(id);
       setInquiries(inquiriesData);
     } catch (err) {
       console.error("Failed to reload inquiries:", err);
@@ -119,7 +126,7 @@ function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = (
     return (
       <div className="space-y-6">
         <button 
-          onClick={() => setActivePage("explore")}
+          onClick={handleBack}
           className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-600 font-bold rounded-xl border-2 border-white shadow-sm hover:text-slate-800 transition-all text-xs cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Back to listings explore
@@ -141,7 +148,7 @@ function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = (
     <div className="space-y-8">
       {/* Back button */}
       <button 
-        onClick={() => setActivePage("explore")}
+        onClick={handleBack}
         className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-600 font-bold rounded-xl border-2 border-white shadow-sm hover:text-slate-800 transition-all text-xs cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" /> Back to listings explore
@@ -176,7 +183,7 @@ function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = (
           {/* Fun Clay Image Tips */}
           <div className="flex items-center gap-3 bg-pink-50/50 p-4 rounded-xl border border-pink-100 text-xs text-pink-700 font-semibold">
             <Info className="w-5 h-5 text-pink-500 shrink-0" />
-            <p>Clay Tip: Always communicate with the seller on this page’s Q&A thread below to discuss delivery & quality checks!</p>
+            <p>Note: Always communicate with the seller on this page’s Q&A thread below to discuss delivery & quality checks!</p>
           </div>
         </div>
 
@@ -278,7 +285,7 @@ function ListingDetailsPage({ selectedProductId, setActivePage, triggerToast = (
         {/* Ask Question Input Form */}
         {!user ? (
           <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 text-center text-xs text-slate-500 font-bold">
-            🔒 Please <button onClick={() => setActivePage("auth")} className="text-indigo-600 hover:underline font-black cursor-pointer">login or sign up</button> to ask questions or discuss this product with the seller.
+            🔒 Please <button onClick={() => navigate("/auth")} className="text-indigo-600 hover:underline font-black cursor-pointer">login or sign up</button> to ask questions or discuss this product with the seller.
           </div>
         ) : !isOwner ? (
           <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 space-y-3">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { MessageCircle, HelpCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import listingService from "../services/listingService";
 import inquiryService from "../services/inquiryService";
@@ -9,7 +10,8 @@ import ListingRow from "../components/profile/ListingRow";
 import InquiryCard from "../components/profile/InquiryCard";
 import {uploadImageToCloudinary} from "../services/cloudinaryService";
 
-function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () => {} }) {
+function ProfilePage({ triggerToast = () => {} }) {
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [myListings, setMyListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -166,7 +168,7 @@ function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () =>
       <div className="clay-card p-12 text-center bg-white/70 max-w-md mx-auto space-y-4">
         <h4 className="text-lg font-bold text-slate-700">Access Denied</h4>
         <p className="text-xs text-slate-500">Please register or log in to access your dashboard.</p>
-        <button onClick={() => setActivePage("auth")} className="px-5 py-2.5 clay-btn-purple text-xs font-black uppercase tracking-wider cursor-pointer">
+        <button onClick={() => navigate("/auth")} className="px-5 py-2.5 clay-btn-purple text-xs font-black uppercase tracking-wider cursor-pointer">
           Login / Sign Up
         </button>
       </div>
@@ -238,8 +240,6 @@ function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () =>
                   actionLoading={actionLoading}
                   onToggleStatus={handleToggleStatus}
                   onDelete={handleDeleteListing}
-                  setSelectedProductId={setSelectedProductId}
-                  setActivePage={setActivePage}
                 />
               ))}
             </div>
@@ -334,8 +334,6 @@ function ProfilePage({ setSelectedProductId, setActivePage, triggerToast = () =>
                     }))
                   }
                   onAnswer={handleAnswerInquiry}
-                  setSelectedProductId={setSelectedProductId}
-                  setActivePage={setActivePage}
                 />
               ))}
             </div>

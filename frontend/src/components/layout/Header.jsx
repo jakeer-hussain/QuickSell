@@ -1,14 +1,21 @@
 import React, { useContext } from "react";
 import { ShoppingBag, User } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 
-function Header({ activePage, setActivePage }) {
+function Header() {
   const { user, logout } = useContext(AuthContext);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    setActivePage("explore");
+    navigate("/");
   };
+
+  const isExplore = location.pathname === "/";
+  const isProfile = location.pathname === "/profile";
+  const isAuth = location.pathname === "/auth";
 
   return (
     <header className="sticky top-0 z-40 px-4 py-3 md:px-8 bg-white/60 backdrop-blur-md border-b-2 border-white/50">
@@ -16,7 +23,7 @@ function Header({ activePage, setActivePage }) {
         
         {/* Logo Brand */}
         <div 
-          onClick={() => setActivePage("explore")}
+          onClick={() => navigate("/")}
           className="flex items-center gap-2 cursor-pointer group"
         >
           <div className="w-12 h-12 bg-gradient-to-tr from-pink-400 to-indigo-400 rounded-2xl flex items-center justify-center border-2 border-white shadow-md transform group-hover:rotate-6 transition-transform">
@@ -24,7 +31,7 @@ function Header({ activePage, setActivePage }) {
           </div>
           <div>
             <h1 className="text-2xl font-black bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              ReSeller
+              QuickSell
             </h1>
             <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-400">Clay Edition</p>
           </div>
@@ -50,9 +57,9 @@ function Header({ activePage, setActivePage }) {
         {/* Primary Navigation links */}
         <nav className="flex items-center gap-3">
           <button 
-            onClick={() => setActivePage("explore")}
+            onClick={() => navigate("/")}
             className={`px-4 py-2 text-sm font-bold transition-all clay-nav-btn cursor-pointer ${
-              activePage === "explore" 
+              isExplore 
                 ? "bg-indigo-100 text-indigo-600 border-indigo-200" 
                 : "bg-white/80 text-slate-600"
             }`}
@@ -62,9 +69,9 @@ function Header({ activePage, setActivePage }) {
           
           {user && (
             <button 
-              onClick={() => setActivePage("profile")}
+              onClick={() => navigate("/profile")}
               className={`px-4 py-2 text-sm font-bold transition-all clay-nav-btn cursor-pointer ${
-                activePage === "profile" 
+                isProfile 
                   ? "bg-pink-100 text-pink-600 border-pink-200" 
                   : "bg-white/80 text-slate-600"
               }`}
@@ -82,9 +89,9 @@ function Header({ activePage, setActivePage }) {
             </button>
           ) : (
             <button 
-              onClick={() => setActivePage("auth")}
+              onClick={() => navigate("/auth")}
               className={`px-4 py-2 text-sm font-bold transition-all clay-nav-btn cursor-pointer ${
-                activePage === "auth" 
+                isAuth 
                   ? "bg-purple-100 text-purple-600 border-purple-200" 
                   : "bg-white/80 text-slate-600"
               }`}

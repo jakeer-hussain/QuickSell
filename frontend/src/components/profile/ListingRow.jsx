@@ -1,14 +1,14 @@
 import React from "react";
 import { Check, Tag, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function ListingRow({
   listing,
   actionLoading,
   onToggleStatus,
   onDelete,
-  setSelectedProductId,
-  setActivePage,
 }) {
+  const navigate = useNavigate();
   const isSold =
     listing.status === "SOLD" ||
     listing.status === "Sold";
@@ -27,8 +27,7 @@ function ListingRow({
       <div
         className="flex items-center gap-4 cursor-pointer"
         onClick={() => {
-          setSelectedProductId(listing._id || listing.id);
-          setActivePage("detail");
+          navigate(`/listings/${listing._id || listing.id}`);
         }}
       >
         <img

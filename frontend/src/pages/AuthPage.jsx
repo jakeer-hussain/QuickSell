@@ -1,8 +1,10 @@
 import React, { useState, useContext } from "react";
 import { Mail, Lock, UserPlus, Sparkles, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-function AuthPage({ setActivePage, triggerToast = () => {} }) {
+function AuthPage({ triggerToast = () => {} }) {
+  const navigate = useNavigate();
   const { login, register, error, setError } = useContext(AuthContext);
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [name, setName] = useState("");
@@ -30,7 +32,7 @@ function AuthPage({ setActivePage, triggerToast = () => {} }) {
         await register(name, email, password);
         triggerToast("Account registered successfully! Welcome 🚀");
       }
-      setActivePage("explore");
+      navigate("/");
     } catch (err) {
       console.error("Auth action failed:", err);
       triggerToast(err.message || "Authentication failed. ⚠️");
@@ -150,7 +152,7 @@ function AuthPage({ setActivePage, triggerToast = () => {} }) {
 
       {/* Quick Demo Assist details */}
       <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 text-center text-xs text-indigo-700 font-semibold">
-        ✨ ReSeller authenticates credentials securely. Create multiple accounts to test Q&A threads and manage separate store inventories!
+        ✨ QuickSell authenticates credentials securely. Create multiple accounts to test Q&A threads and manage separate store inventories!
       </div>
 
     </div>

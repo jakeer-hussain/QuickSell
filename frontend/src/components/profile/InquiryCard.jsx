@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function InquiryCard({
   inquiry,
@@ -6,9 +7,8 @@ function InquiryCard({
   answerText,
   setAnswerText,
   onAnswer,
-  setSelectedProductId,
-  setActivePage,
 }) {
+  const navigate = useNavigate();
   const buyerName =
     inquiry.buyer?.name ||
     "Potential Buyer";
@@ -43,12 +43,12 @@ function InquiryCard({
               inquiry.listing?._id ||
               inquiry.listing?.id
             ) {
-              setSelectedProductId(
-                inquiry.listing._id ||
-                inquiry.listing.id
+              navigate(
+                `/listings/${
+                  inquiry.listing._id ||
+                  inquiry.listing.id
+                }`
               );
-
-              setActivePage("detail");
             }
           }}
         >

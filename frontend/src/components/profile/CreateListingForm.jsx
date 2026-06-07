@@ -115,21 +115,45 @@ function CreateListingForm({
 
         {/* Mock Image Picker */}
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-slate-500 tracking-wider">
+          {/* <label className="text-xs font-black uppercase text-slate-500 tracking-wider">
             Product Image
-          </label>
+          </label> */}
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase text-slate-500 tracking-wider">
+              Product Image
+            </label>
 
-              if (file) {
-                setNewImage(file);
-              }
-            }}
-          />
+            <label className="flex items-center justify-between px-4 py-3 clay-input cursor-pointer">
+              <span className="text-sm font-semibold text-slate-600">
+                {newImage ? newImage.name : "Choose an image"}
+              </span>
+
+              <span className="px-3 py-1 rounded-lg bg-indigo-500 text-white text-xs font-bold">
+                Browse
+              </span>
+
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setNewImage(file);
+                  }
+                }}
+              />
+            </label>
+
+            {newImage && (
+              <img
+                src={URL.createObjectURL(newImage)}
+                alt="Preview"
+                className="w-full h-40 object-cover rounded-xl"
+              />
+            )}
+          </div>
 
           {newImage && (
             <img
